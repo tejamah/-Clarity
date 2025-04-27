@@ -4,3 +4,4 @@ flask-socketio
 apscheduler
 requests
 eventlet
+feedparser
