@@ -5,3 +5,5 @@ apscheduler
 requests
 eventlet
 feedparser
+transformers
+torch
