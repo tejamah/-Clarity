@@ -6,7 +6,6 @@ import time
 import feedparser
 
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
-import torch
 
 # === Flask Setup ===
 app = Flask(__name__)
@@ -32,7 +31,7 @@ news_cache = {}
 # === Summarization Route ===
 @app.route("/summarize", methods=["POST"])
 def summarize():
-    data = request.get_json()
+    data = request.get_json(silent=True) or {}
     text = data.get("text", "")
 
     if not text:
@@ -55,7 +54,6 @@ def summarize_internal(text):
 
 # === Fetch News from RSS and Summarize ===
 def fetch_and_summarize_news():
-    global news_cache
     new_data = {}
 
     print("[+] Fetching and summarizing news from Google RSS...")
