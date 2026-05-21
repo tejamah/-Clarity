@@ -119,6 +119,118 @@
         width: 8px;
       }
 
+      .actions {
+        align-items: center;
+        display: flex;
+        gap: 10px;
+      }
+
+      .auth-toggle,
+      .auth-submit,
+      .logout {
+        border: 1px solid rgba(23, 23, 23, 0.14);
+        border-radius: 999px;
+        cursor: pointer;
+        font: inherit;
+        font-size: 0.9rem;
+        font-weight: 850;
+        padding: 9px 13px;
+      }
+
+      .auth-toggle,
+      .logout {
+        background: var(--ink);
+        color: #fff;
+      }
+
+      .auth-panel {
+        background: rgba(255, 253, 247, 0.94);
+        border: 1px solid rgba(23, 23, 23, 0.11);
+        border-radius: 8px;
+        box-shadow: var(--shadow);
+        display: none;
+        margin-bottom: 14px;
+        padding: 14px;
+      }
+
+      .auth-panel.open {
+        display: block;
+      }
+
+      .auth-form {
+        align-items: center;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr auto auto;
+        gap: 10px;
+      }
+
+      .auth-form.login-mode .name-field {
+        display: none;
+      }
+
+      .auth-form input {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        color: var(--ink);
+        font: inherit;
+        font-weight: 650;
+        min-width: 0;
+        padding: 11px 12px;
+      }
+
+      .auth-submit {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #fff;
+      }
+
+      .mode-switch {
+        background: transparent;
+        border: 0;
+        color: var(--blue);
+        cursor: pointer;
+        font: inherit;
+        font-weight: 850;
+        padding: 8px;
+      }
+
+      .auth-message {
+        color: var(--warn);
+        font-size: 0.9rem;
+        font-weight: 750;
+        margin-top: 10px;
+        min-height: 1.2em;
+      }
+
+      .user-chip {
+        align-items: center;
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        display: none;
+        font-size: 0.9rem;
+        font-weight: 850;
+        gap: 8px;
+        padding: 8px 12px;
+      }
+
+      .user-chip.visible {
+        display: inline-flex;
+      }
+
+      .user-chip::before {
+        background: var(--blue);
+        border-radius: 50%;
+        color: #fff;
+        content: attr(data-initial);
+        display: grid;
+        font-size: 0.75rem;
+        height: 22px;
+        place-items: center;
+        width: 22px;
+      }
+
       .tabs {
         display: flex;
         gap: 8px;
@@ -307,6 +419,16 @@
         .status {
           white-space: normal;
         }
+
+        .actions {
+          align-items: stretch;
+          flex-wrap: wrap;
+          width: 100%;
+        }
+
+        .auth-form {
+          grid-template-columns: 1fr;
+        }
       }
 
       @media (max-width: 980px) {
@@ -352,8 +474,31 @@
               <div class="deck">Fast free feeds, clean summaries, endless scroll.</div>
             </div>
           </div>
-          <div class="status" id="status">Live updating</div>
+          <div class="actions">
+            <div class="status" id="status">Live updating</div>
+            <div class="user-chip" id="userChip" data-initial=""></div>
+            <button class="auth-toggle" id="authToggle" type="button">Sign in</button>
+            <button class="logout" id="logoutButton" type="button" hidden>Logout</button>
+          </div>
         </div>
+        <section class="auth-panel" id="authPanel" aria-label="User account">
+          <form class="auth-form login-mode" id="authForm">
+            <input class="name-field" id="nameInput" name="name" autocomplete="name" placeholder="Name" />
+            <input id="emailInput" name="email" autocomplete="email" placeholder="Email" type="email" required />
+            <input
+              id="passwordInput"
+              name="password"
+              autocomplete="current-password"
+              minlength="8"
+              placeholder="Password"
+              type="password"
+              required
+            />
+            <button class="auth-submit" id="authSubmit" type="submit">Sign in</button>
+            <button class="mode-switch" id="modeSwitch" type="button">Create account</button>
+          </form>
+          <div class="auth-message" id="authMessage"></div>
+        </section>
         <nav class="tabs" id="tabs" aria-label="News categories"></nav>
       </div>
     </header>
@@ -367,12 +512,25 @@
         active: "top",
         categories: ["top", "technology", "business", "sports", "entertainment"],
         articles: {},
+        authMode: "login",
         updatedAt: null,
+        user: null,
       };
 
       const tabs = document.querySelector("#tabs");
       const news = document.querySelector("#news");
       const status = document.querySelector("#status");
+      const authToggle = document.querySelector("#authToggle");
+      const authPanel = document.querySelector("#authPanel");
+      const authForm = document.querySelector("#authForm");
+      const authSubmit = document.querySelector("#authSubmit");
+      const modeSwitch = document.querySelector("#modeSwitch");
+      const authMessage = document.querySelector("#authMessage");
+      const logoutButton = document.querySelector("#logoutButton");
+      const userChip = document.querySelector("#userChip");
+      const nameInput = document.querySelector("#nameInput");
+      const emailInput = document.querySelector("#emailInput");
+      const passwordInput = document.querySelector("#passwordInput");
 
       function formatCategory(category) {
         return category.replaceAll("-", " ");
@@ -391,6 +549,54 @@
           .map((part) => part[0])
           .join("")
           .toUpperCase();
+      }
+
+      function userInitial(name = "") {
+        return (name.trim()[0] || "U").toUpperCase();
+      }
+
+      function setAuthMessage(message = "") {
+        authMessage.textContent = message;
+      }
+
+      function setAuthMode(mode) {
+        state.authMode = mode;
+        const isRegister = mode === "register";
+        authForm.classList.toggle("login-mode", !isRegister);
+        nameInput.required = isRegister;
+        passwordInput.autocomplete = isRegister ? "new-password" : "current-password";
+        authSubmit.textContent = isRegister ? "Create" : "Sign in";
+        modeSwitch.textContent = isRegister ? "Use sign in" : "Create account";
+        setAuthMessage("");
+      }
+
+      function renderAuth() {
+        const user = state.user;
+        userChip.classList.toggle("visible", Boolean(user));
+        logoutButton.hidden = !user;
+        authToggle.hidden = Boolean(user);
+
+        if (user) {
+          userChip.dataset.initial = userInitial(user.name);
+          userChip.textContent = user.name;
+          authPanel.classList.remove("open");
+        } else {
+          userChip.dataset.initial = "";
+          userChip.textContent = "";
+        }
+      }
+
+      async function authRequest(path, body) {
+        const response = await fetch(path, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        const payload = await response.json();
+        if (!response.ok) {
+          throw new Error(payload.error || "Account request failed.");
+        }
+        return payload;
       }
 
       function renderTabs() {
@@ -509,6 +715,61 @@
         }
       }
 
+      async function loadUser() {
+        try {
+          const response = await fetch("/api/auth/me");
+          const payload = await response.json();
+          state.user = payload.user;
+          renderAuth();
+        } catch (error) {
+          state.user = null;
+          renderAuth();
+        }
+      }
+
+      authToggle.addEventListener("click", () => {
+        authPanel.classList.toggle("open");
+        setAuthMessage("");
+      });
+
+      modeSwitch.addEventListener("click", () => {
+        setAuthMode(state.authMode === "login" ? "register" : "login");
+      });
+
+      authForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        setAuthMessage("");
+
+        const body = {
+          email: emailInput.value,
+          password: passwordInput.value,
+        };
+        if (state.authMode === "register") {
+          body.name = nameInput.value;
+        }
+
+        try {
+          const payload = await authRequest(`/api/auth/${state.authMode}`, body);
+          state.user = payload.user;
+          authForm.reset();
+          renderAuth();
+        } catch (error) {
+          setAuthMessage(error.message);
+        }
+      });
+
+      logoutButton.addEventListener("click", async () => {
+        try {
+          const payload = await authRequest("/api/auth/logout", {});
+          state.user = payload.user;
+          renderAuth();
+        } catch (error) {
+          setAuthMessage(error.message);
+        }
+      });
+
+      setAuthMode("login");
+      loadUser();
       render();
       loadNews();
 

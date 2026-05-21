@@ -3,25 +3,29 @@ from datetime import datetime, timezone
 from html import unescape
 import os
 import re
+import sqlite3
 from pathlib import Path
 from urllib.parse import urlparse
 from xml.etree import ElementTree
 
 from apscheduler.schedulers.background import BackgroundScheduler
-from flask import Flask, jsonify, send_from_directory
+from flask import Flask, jsonify, request, send_from_directory, session
 from flask_cors import CORS
 import requests
+from werkzeug.security import check_password_hash, generate_password_hash
 
 
 BASE_DIR = Path(__file__).resolve().parent
 FRONTEND_DIR = BASE_DIR.parent / "frontend" / "frontend-react" / "public"
+DATABASE_PATH = BASE_DIR / "live_news.db"
 FEED_ITEM_LIMIT = 35
 CATEGORY_ARTICLE_LIMIT = 100
 GOOGLE_CUSTOM_SEARCH_REFRESH_SECONDS = 60 * 60 * 4
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", "")
 GOOGLE_CSE_ID = os.getenv("GOOGLE_CSE_ID", "")
 
-app = Flask(__name__, static_folder=str(FRONTEND_DIR), static_url_path="")
+app = Flask(__name__)
+app.secret_key = os.getenv("SECRET_KEY", "dev-live-news-change-me")
 CORS(app)
 
 CATEGORIES = {
@@ -121,6 +125,52 @@ news_cache = {
 }
 google_search_cache = {}
 scheduler = None
+
+
+def get_db():
+    connection = sqlite3.connect(DATABASE_PATH)
+    connection.row_factory = sqlite3.Row
+    return connection
+
+
+def init_db():
+    with get_db() as db:
+        db.execute(
+            """
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                email TEXT NOT NULL UNIQUE,
+                password_hash TEXT NOT NULL,
+                created_at TEXT NOT NULL
+            )
+            """
+        )
+
+
+def public_user(row):
+    if not row:
+        return None
+
+    return {"id": row["id"], "name": row["name"], "email": row["email"]}
+
+
+def current_user():
+    user_id = session.get("user_id")
+    if not user_id:
+        return None
+
+    with get_db() as db:
+        row = db.execute(
+            "SELECT id, name, email FROM users WHERE id = ?",
+            (user_id,),
+        ).fetchone()
+
+    return public_user(row)
+
+
+def normalize_email(email):
+    return (email or "").strip().lower()
 
 
 def strip_html(value):
@@ -346,6 +396,75 @@ def get_all_news():
 def get_news(category):
     ensure_news_loaded()
     return jsonify(news_cache["articles"].get(category, []))
+
+
+@app.route("/api/auth/me")
+def auth_me():
+    return jsonify({"user": current_user()})
+
+
+@app.route("/api/auth/register", methods=["POST"])
+def auth_register():
+    data = request.get_json(silent=True) or {}
+    name = (data.get("name") or "").strip()
+    email = normalize_email(data.get("email"))
+    password = data.get("password") or ""
+
+    if len(name) < 2:
+        return jsonify({"error": "Name must be at least 2 characters."}), 400
+    if not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", email):
+        return jsonify({"error": "Enter a valid email address."}), 400
+    if len(password) < 8:
+        return jsonify({"error": "Password must be at least 8 characters."}), 400
+
+    try:
+        with get_db() as db:
+            cursor = db.execute(
+                """
+                INSERT INTO users (name, email, password_hash, created_at)
+                VALUES (?, ?, ?, ?)
+                """,
+                (
+                    name,
+                    email,
+                    generate_password_hash(password),
+                    datetime.now(timezone.utc).isoformat(),
+                ),
+            )
+            user_id = cursor.lastrowid
+    except sqlite3.IntegrityError:
+        return jsonify({"error": "An account with that email already exists."}), 409
+
+    session["user_id"] = user_id
+    return jsonify({"user": current_user()}), 201
+
+
+@app.route("/api/auth/login", methods=["POST"])
+def auth_login():
+    data = request.get_json(silent=True) or {}
+    email = normalize_email(data.get("email"))
+    password = data.get("password") or ""
+
+    with get_db() as db:
+        row = db.execute(
+            "SELECT id, name, email, password_hash FROM users WHERE email = ?",
+            (email,),
+        ).fetchone()
+
+    if not row or not check_password_hash(row["password_hash"], password):
+        return jsonify({"error": "Invalid email or password."}), 401
+
+    session["user_id"] = row["id"]
+    return jsonify({"user": public_user(row)})
+
+
+@app.route("/api/auth/logout", methods=["POST"])
+def auth_logout():
+    session.clear()
+    return jsonify({"user": None})
+
+
+init_db()
 
 
 if __name__ == "__main__":
