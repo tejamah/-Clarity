@@ -5,16 +5,16 @@ The easiest free path for this app is Render with the included `render.yaml`.
 ## Deploy On Render
 
 1. Push this repository to GitHub.
-2. Open Render and choose **New +** -> **Blueprint**.
+2. Open Render and choose **New +** -> **Web Service** or **Blueprint**.
 3. Connect the GitHub repository.
-4. Render will read `render.yaml` and create a free Python web service.
-5. Click **Apply** and wait for the build to finish.
+4. Use the free instance type.
+5. Click **Deploy Web Service** and wait for the build to finish.
 
-The Blueprint uses:
+For a manual web service, use:
 
 ```bash
-pip install -r backend/requirements-deploy.txt
-gunicorn -w 1 -b 0.0.0.0:$PORT backend.app:app
+Build Command: pip install -r requirements.txt
+Start Command: gunicorn -w 1 -b 0.0.0.0:$PORT backend.app:app
 ```
 
 `-w 1` is intentional because the app runs a background news refresh scheduler.
@@ -24,6 +24,7 @@ Multiple workers would start multiple schedulers.
 
 Required:
 
+- `PYTHON_VERSION=3.11.9` - also pinned in `.python-version`.
 - `SECRET_KEY` - generated automatically by Render.
 - `START_NEWS_SCHEDULER=true` - starts continuous news refreshes under Gunicorn.
 - `SESSION_COOKIE_SECURE=true` - secure cookies over HTTPS.
