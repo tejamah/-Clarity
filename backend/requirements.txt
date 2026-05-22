@@ -2,3 +2,13 @@ flask
 flask-cors
 apscheduler
 requests
+python-dotenv
+gunicorn
+pytest
+sentry-sdk
+textblob
+spacy
+scikit-learn
+numpy
+flask-mail
+redis

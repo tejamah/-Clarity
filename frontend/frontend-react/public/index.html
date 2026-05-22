@@ -3,6 +3,11 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Live news feeds with AI-powered summaries" />
+    <meta name="theme-color" content="#e5484d" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%23171717' width='192' height='192'/><text x='50%' y='50%' font-size='96' font-weight='900' fill='%23fffdf7' dominant-baseline='central' text-anchor='middle'>LN</text></svg>" />
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%23e5484d' width='192' height='192'/><text x='96' y='96' font-size='96' font-weight='900' fill='white' dominant-baseline='central' text-anchor='middle'>LN</text></svg>" />
     <title>Live Summarized News</title>
     <style>
       :root {
@@ -19,6 +24,22 @@
         --gold: #b7791f;
         --shadow: 0 22px 60px rgba(28, 25, 23, 0.13);
         --warn: #a34112;
+      }
+
+      :root.dark {
+        color-scheme: dark;
+        --bg: #0f0f0f;
+        --paper: #1e1e1e;
+        --ink: #f0f0f0;
+        --muted: #b0b0b0;
+        --line: #333333;
+        --accent: #ff5555;
+        --accent-strong: #ff7777;
+        --blue: #6ba3ff;
+        --green: #51cf66;
+        --gold: #ffa94d;
+        --shadow: 0 22px 60px rgba(0, 0, 0, 0.6);
+        --warn: #ff8c66;
       }
 
       * {
@@ -47,10 +68,16 @@
         backdrop-filter: blur(18px) saturate(1.2);
       }
 
+      :root.dark header {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(20, 20, 20, 0.95);
+        backdrop-filter: blur(18px) saturate(1.2);
+      }
+
       .topbar {
         width: min(1280px, calc(100% - 32px));
         margin: 0 auto;
-        padding: 20px 0 16px;
+        padding: 28px 0 18px;
       }
 
       .title-row {
@@ -58,6 +85,7 @@
         align-items: center;
         justify-content: space-between;
         gap: 16px;
+        flex-wrap: wrap;
         margin-bottom: 18px;
       }
 
@@ -85,7 +113,7 @@
         margin: 0;
         font-size: clamp(1.55rem, 3vw, 2.35rem);
         letter-spacing: 0;
-        line-height: 0.95;
+        line-height: 1.12;
       }
 
       .deck {
@@ -108,6 +136,13 @@
         gap: 8px;
         padding: 9px 13px;
         white-space: nowrap;
+      }
+
+      :root.dark .status {
+        background: #2a2a2a;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        color: #f0f0f0;
       }
 
       .status::before {
@@ -143,6 +178,19 @@
         color: #fff;
       }
 
+      :root.dark .auth-toggle,
+      :root.dark .logout {
+        background: #ff5555;
+        border: 1px solid #ff5555;
+        color: white;
+      }
+
+      :root.dark .auth-toggle:hover,
+      :root.dark .logout:hover {
+        background: #ff7777;
+        border-color: #ff7777;
+      }
+
       .auth-panel {
         background: rgba(255, 253, 247, 0.94);
         border: 1px solid rgba(23, 23, 23, 0.11);
@@ -151,6 +199,11 @@
         display: none;
         margin-bottom: 14px;
         padding: 14px;
+      }
+
+      :root.dark .auth-panel {
+        background: rgba(37, 37, 37, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.1);
       }
 
       .auth-panel.open {
@@ -177,6 +230,16 @@
         font-weight: 650;
         min-width: 0;
         padding: 11px 12px;
+      }
+
+      :root.dark .auth-form input {
+        background: #333333;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: #f0f0f0;
+      }
+
+      :root.dark .auth-form input::placeholder {
+        color: #888888;
       }
 
       .auth-submit {
@@ -257,6 +320,23 @@
           transform 160ms ease;
       }
 
+      :root.dark .tab {
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        background: rgba(50, 50, 50, 0.8);
+        color: var(--ink);
+      }
+
+      :root.dark .tab:hover {
+        border-color: rgba(255, 255, 255, 0.3);
+        background: rgba(70, 70, 70, 0.9);
+      }
+
+      :root.dark .tab.active {
+        background: #ff5555;
+        border-color: #ff5555;
+        color: white;
+      }
+
       .tab:hover {
         border-color: rgba(23, 23, 23, 0.26);
         transform: translateY(-1px);
@@ -293,6 +373,18 @@
           box-shadow 180ms ease,
           transform 180ms ease,
           border-color 180ms ease;
+      }
+
+      :root.dark article {
+        background: #252525;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      }
+
+      :root.dark article:hover {
+        border-color: rgba(255, 255, 255, 0.2);
+        box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+        transform: translateY(-3px);
       }
 
       article:hover {
@@ -373,6 +465,10 @@
         margin: 0;
       }
 
+      :root.dark p {
+        color: #d0d0d0;
+      }
+
       a {
         align-items: center;
         color: var(--accent-strong);
@@ -408,6 +504,123 @@
       .error {
         border-color: #fed7aa;
         color: var(--warn);
+      }
+
+      :root.dark .error {
+        border-color: rgba(255, 140, 102, 0.3);
+        color: #ff8c66;
+      }
+
+      .theme-toggle {
+        background: transparent;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        cursor: pointer;
+        font: inherit;
+        font-size: 0.9rem;
+        font-weight: 850;
+        padding: 8px;
+        color: var(--ink);
+      }
+
+      :root.dark .theme-toggle {
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        color: #f0f0f0;
+      }
+
+      :root.dark .theme-toggle:hover {
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      .badge {
+        display: inline-block;
+        font-size: 0.75rem;
+        font-weight: 800;
+        padding: 4px 8px;
+        border-radius: 4px;
+        margin-right: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .badge-sentiment-positive {
+        background: rgba(13, 122, 95, 0.15);
+        color: var(--green);
+      }
+
+      :root.dark .badge-sentiment-positive {
+        background: rgba(81, 207, 102, 0.2);
+        color: #51cf66;
+      }
+
+      .badge-sentiment-negative {
+        background: rgba(229, 72, 77, 0.15);
+        color: var(--accent);
+      }
+
+      :root.dark .badge-sentiment-negative {
+        background: rgba(255, 85, 85, 0.2);
+        color: #ff7777;
+      }
+
+      .badge-sentiment-neutral {
+        background: rgba(160, 160, 160, 0.15);
+        color: var(--muted);
+      }
+
+      :root.dark .badge-sentiment-neutral {
+        background: rgba(176, 176, 176, 0.15);
+        color: #b0b0b0;
+      }
+
+      .badge-trending {
+        background: rgba(255, 165, 0, 0.15);
+        color: var(--gold);
+      }
+
+      :root.dark .badge-trending {
+        background: rgba(255, 169, 77, 0.2);
+        color: #ffa94d;
+      }
+
+      .badge-read-time {
+        background: rgba(38, 98, 217, 0.15);
+        color: var(--blue);
+      }
+
+      :root.dark .badge-read-time {
+        background: rgba(107, 163, 255, 0.2);
+        color: #6ba3ff;
+      }
+
+      .save-button {
+        background: transparent;
+        border: 1px solid var(--line);
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        font-weight: 800;
+        padding: 6px 10px;
+        color: var(--ink);
+        transition: all 160ms ease;
+        margin-top: 8px;
+      }
+
+      :root.dark .save-button {
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        color: #f0f0f0;
+      }
+
+      :root.dark .save-button:hover {
+        background: rgba(255, 85, 85, 0.2);
+        border-color: #ff5555;
+        color: #ff99ff;
+      }
+
+      :root.dark .save-button.saved {
+        background: rgba(81, 207, 102, 0.2);
+        color: #51cf66;
+        border-color: #51cf66;
       }
 
       @media (max-width: 640px) {
@@ -476,6 +689,7 @@
           </div>
           <div class="actions">
             <div class="status" id="status">Live updating</div>
+            <button class="theme-toggle" id="themeToggle" type="button" title="Toggle dark mode">Theme</button>
             <div class="user-chip" id="userChip" data-initial=""></div>
             <button class="auth-toggle" id="authToggle" type="button">Sign in</button>
             <button class="logout" id="logoutButton" type="button" hidden>Logout</button>
@@ -513,6 +727,8 @@
         categories: ["top", "technology", "business", "sports", "entertainment"],
         articles: {},
         authMode: "login",
+        csrfToken: "",
+        savedUrls: new Set(),
         updatedAt: null,
         user: null,
       };
@@ -531,6 +747,7 @@
       const nameInput = document.querySelector("#nameInput");
       const emailInput = document.querySelector("#emailInput");
       const passwordInput = document.querySelector("#passwordInput");
+      const themeToggle = document.querySelector("#themeToggle");
 
       function formatCategory(category) {
         return category.replaceAll("-", " ");
@@ -586,15 +803,75 @@
         }
       }
 
+      async function loadSavedArticles() {
+        if (!state.user) {
+          state.savedUrls = new Set();
+          return;
+        }
+
+        try {
+          const payload = await apiGet("/api/saved");
+          state.savedUrls = new Set((payload.articles || []).map((article) => article.url));
+        } catch (error) {
+          state.savedUrls = new Set();
+        }
+      }
+
+      async function loadCsrfToken() {
+        const response = await fetch("/api/auth/csrf", { credentials: "same-origin" });
+        const payload = await response.json();
+        state.csrfToken = payload.csrfToken || "";
+        return state.csrfToken;
+      }
+
+      async function ensureCsrfToken() {
+        if (!state.csrfToken) {
+          await loadCsrfToken();
+        }
+        return state.csrfToken;
+      }
+
       async function authRequest(path, body) {
+        const requestWithToken = async () => {
+          const csrfToken = await ensureCsrfToken();
+          return fetch(path, {
+            method: "POST",
+            credentials: "same-origin",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRF-Token": csrfToken,
+            },
+            body: JSON.stringify(body),
+          });
+        };
+
+        let response = await requestWithToken();
+        if (response.status === 403) {
+          state.csrfToken = "";
+          await loadCsrfToken();
+          response = await requestWithToken();
+        }
+
+        const payload = await response.json();
+        if (!response.ok) {
+          const error = new Error(payload.error || "Account request failed.");
+          error.status = response.status;
+          throw error;
+        }
+        state.csrfToken = payload.csrfToken || state.csrfToken;
+        return payload;
+      }
+
+      async function apiGet(path) {
         const response = await fetch(path, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
+          credentials: "same-origin",
+          cache: "no-store",
         });
         const payload = await response.json();
         if (!response.ok) {
-          throw new Error(payload.error || "Account request failed.");
+          const error = new Error(payload.error || "Request failed.");
+          error.status = response.status;
+          throw error;
         }
         return payload;
       }
@@ -638,6 +915,30 @@
         meta.className = "meta";
         meta.textContent = [article.source, article.published].filter(Boolean).join(" - ");
 
+        const badges = document.createElement("div");
+        badges.className = "meta";
+        
+        if (article.reading_time) {
+          const readTime = document.createElement("span");
+          readTime.className = "badge badge-read-time";
+          readTime.textContent = `${article.reading_time} min read`;
+          badges.append(readTime);
+        }
+
+        if (article.sentiment) {
+          const sentiment = document.createElement("span");
+          sentiment.className = `badge badge-sentiment-${article.sentiment}`;
+          sentiment.textContent = article.sentiment;
+          badges.append(sentiment);
+        }
+
+        if (article.trending) {
+          const trending = document.createElement("span");
+          trending.className = "badge badge-trending";
+          trending.textContent = "Trending";
+          badges.append(trending);
+        }
+
         const title = document.createElement("h2");
         title.textContent = article.title;
 
@@ -650,7 +951,50 @@
         link.rel = "noreferrer";
         link.textContent = "Read story";
 
-        content.append(meta, title, summary, link);
+        const saveBtn = document.createElement("button");
+        saveBtn.className = "save-button";
+        const isSaved = state.savedUrls.has(article.url);
+        saveBtn.classList.toggle("saved", isSaved);
+        saveBtn.textContent = isSaved ? "Saved" : "Save";
+        saveBtn.disabled = isSaved;
+        saveBtn.addEventListener("click", async (e) => {
+          e.preventDefault();
+          if (saveBtn.disabled) {
+            return;
+          }
+
+          const user = state.user;
+          if (!user) {
+            setAuthMessage("Please sign in to save articles");
+            authPanel.classList.add("open");
+            return;
+          }
+
+          saveBtn.disabled = true;
+          saveBtn.textContent = "Saving...";
+
+          try {
+            await authRequest("/api/saved", {
+              url: article.url,
+              title: article.title,
+            });
+            state.savedUrls.add(article.url);
+            saveBtn.classList.add("saved");
+            saveBtn.textContent = "Saved";
+          } catch (error) {
+            if (error.status === 409 || error.message.toLowerCase().includes("already saved")) {
+              state.savedUrls.add(article.url);
+              saveBtn.classList.add("saved");
+              saveBtn.textContent = "Saved";
+              return;
+            }
+            saveBtn.disabled = false;
+            saveBtn.textContent = "Try again";
+            setAuthMessage(error.message || "Could not save article.");
+          }
+        });
+
+        content.append(meta, badges, title, summary, link, saveBtn);
         card.append(content);
         return card;
       }
@@ -677,7 +1021,8 @@
         if (!articles.length) {
           const empty = document.createElement("div");
           empty.className = "empty";
-          empty.textContent = "No stories loaded for this category yet. Fresh stories are loading now.";
+          empty.textContent =
+            "No stories are available yet. The app is waiting for the news feeds to respond and will refresh automatically.";
           news.append(empty);
           return;
         }
@@ -704,7 +1049,7 @@
 
       async function loadNews() {
         try {
-          const response = await fetch("/api/news");
+          const response = await fetch("/api/news", { credentials: "same-origin", cache: "no-store" });
           if (!response.ok) {
             throw new Error(`Backend returned ${response.status}`);
           }
@@ -717,13 +1062,16 @@
 
       async function loadUser() {
         try {
-          const response = await fetch("/api/auth/me");
-          const payload = await response.json();
+          const payload = await apiGet("/api/auth/me");
           state.user = payload.user;
+          await loadSavedArticles();
           renderAuth();
+          renderNews();
         } catch (error) {
           state.user = null;
+          state.savedUrls = new Set();
           renderAuth();
+          renderNews();
         }
       }
 
@@ -751,8 +1099,10 @@
         try {
           const payload = await authRequest(`/api/auth/${state.authMode}`, body);
           state.user = payload.user;
+          await loadSavedArticles();
           authForm.reset();
           renderAuth();
+          renderNews();
         } catch (error) {
           setAuthMessage(error.message);
         }
@@ -762,16 +1112,44 @@
         try {
           const payload = await authRequest("/api/auth/logout", {});
           state.user = payload.user;
+          state.savedUrls = new Set();
           renderAuth();
+          renderNews();
         } catch (error) {
           setAuthMessage(error.message);
         }
       });
 
       setAuthMode("login");
+      
+      // Dark mode management
+      const initTheme = () => {
+        const isDark = localStorage.getItem("darkMode") === "true" || 
+                       window.matchMedia("(prefers-color-scheme: dark)").matches;
+        if (isDark) {
+          document.documentElement.classList.add("dark");
+        }
+      };
+
+      themeToggle.addEventListener("click", () => {
+        const isDark = document.documentElement.classList.toggle("dark");
+        localStorage.setItem("darkMode", isDark);
+      });
+
+      initTheme();
+      loadCsrfToken();
       loadUser();
       render();
       loadNews();
+
+      // Register service worker for PWA offline support
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker
+          .register("/service-worker.js", { updateViaCache: "none" })
+          .then((registration) => registration.update())
+          .then(() => setTimeout(loadNews, 1000))
+          .catch((err) => console.debug("SW registration failed:", err));
+      }
 
       setInterval(loadNews, 15000);
     </script>

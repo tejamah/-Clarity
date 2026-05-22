@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: live-summarized-news
+    runtime: python
+    plan: free
+    buildCommand: pip install -r backend/requirements-deploy.txt
+    startCommand: gunicorn -w 1 -b 0.0.0.0:$PORT backend.app:app
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: START_NEWS_SCHEDULER
+        value: "true"
+      - key: SESSION_COOKIE_SECURE
+        value: "true"
+      - key: SECRET_KEY
+        generateValue: true
